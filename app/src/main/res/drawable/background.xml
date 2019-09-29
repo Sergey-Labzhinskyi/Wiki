@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:drawable="@color/colorPrimary" />
+
+    <item tools:ignore="ExtraText">
+        android:gravity="center"
+        <bitmap android:src="@drawable/ic_rick_morty"/>
+
+
+    </item>
+
+</layer-list>
