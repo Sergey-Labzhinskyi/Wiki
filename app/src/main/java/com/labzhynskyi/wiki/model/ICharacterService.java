@@ -14,12 +14,6 @@ import retrofit2.http.Url;
 
 public interface ICharacterService {
 
-
-
     @GET()
-   // Call<CharacterList> getCharacter();
-    Observable<CharacterList> getCharacter1(@Url String page); //@Path("page") String page
-
-    @GET("character/?page=2")
-    Observable<CharacterList> getCharacter2();
+    Observable<CharacterList> getCharacter1(@Url String page); 
 }
