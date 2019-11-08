@@ -143,13 +143,14 @@ public class CharacterListPresenter implements ICharacterListPresenter {
 
     }
 
+
     @Override
     public Observable<List<CharacterData>> getListCharacterNetwork() {
         Log.d(TAG, "getListCharacterNetwork");
         return Observable.range(1, 25)
                 .flatMap(page -> mDataBaseHelper.getCharactersNetwork(page))
                 .flatMap(i -> Observable.just(i.getResults()))
-                .flatMap(i -> Observable.fromIterable(i))
+                .flatMap(Observable::fromIterable)
                 .map(s -> {
                     mCharacterList.add(s);
                     return mCharacterList;
