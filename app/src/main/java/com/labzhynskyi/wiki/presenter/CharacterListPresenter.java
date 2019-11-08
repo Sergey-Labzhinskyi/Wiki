@@ -39,7 +39,7 @@ public class CharacterListPresenter implements ICharacterListPresenter {
     private DataBaseHelper mDataBaseHelper;
     private Date mDate;
     private SimpleDateFormat mSimpleDateFormat;
-    private String mStringDate;
+    private static String mStringDate;
 
 
     @Override
@@ -86,7 +86,7 @@ public class CharacterListPresenter implements ICharacterListPresenter {
                     public void onComplete() {
                         Log.d(TAG, "onComplete");
                         CharacterListResult.setCharacterDataList(mCharacterList);
-                        mICharacterListActivity.updateUI(mCharacterList, getDate());
+                        mICharacterListActivity.updateUI(mCharacterList, mStringDate);
                         disposable.dispose();
                     }
                 });
@@ -183,7 +183,7 @@ public class CharacterListPresenter implements ICharacterListPresenter {
     public String getDate() {
         Log.d(TAG, "getDate");
         mDate = Calendar.getInstance().getTime();
-        mSimpleDateFormat = new SimpleDateFormat("dd.MM.yyyy, HH:mm");
+        mSimpleDateFormat = new SimpleDateFormat("dd.MM.yyyy, HH:mm:ss");
         return mStringDate = mSimpleDateFormat.format(mDate);
     }
 

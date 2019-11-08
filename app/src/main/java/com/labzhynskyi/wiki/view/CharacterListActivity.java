@@ -53,7 +53,8 @@ public class CharacterListActivity extends AppCompatActivity implements Characte
             isSavedDB = true;
         }else if (checkConnect()){
             ToastUtil.showLong("Есть подключения к интернету", this);
-            getCharacterList();
+            mCharacterListPresenter.getCharacterListNetwork();
+          //  getCharacterList();
         }
         else {
             ToastUtil.showLong("Нет подключения к интернету", this);
@@ -116,7 +117,7 @@ public class CharacterListActivity extends AppCompatActivity implements Characte
     @Override
     public void updateUI(List<CharacterData> list, String date) {
         mCharacters = list;
-        if (count == 1){
+        if (mCharacters.size() != 0){
             mStringDate = date;
         }
         final FragmentManager fm = getSupportFragmentManager();
