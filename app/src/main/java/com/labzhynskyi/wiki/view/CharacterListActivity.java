@@ -54,7 +54,7 @@ public class CharacterListActivity extends AppCompatActivity implements Characte
         }else if (checkConnect()){
             ToastUtil.showLong("Есть подключения к интернету", this);
             mCharacterListPresenter.getCharacterListNetwork();
-          //  getCharacterList();
+          
         }
         else {
             ToastUtil.showLong("Нет подключения к интернету", this);
