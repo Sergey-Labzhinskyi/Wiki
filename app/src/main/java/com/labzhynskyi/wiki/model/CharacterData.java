@@ -2,16 +2,25 @@ package com.labzhynskyi.wiki.model;
 
 import android.os.Parcelable;
 
+import androidx.room.Embedded;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
 import java.util.List;
 
-public class CharacterData implements Serializable, Comparable<CharacterData>{
+import io.reactivex.ObservableSource;
+import io.reactivex.Observer;
+
+@Entity
+public class CharacterData implements Serializable, Comparable<CharacterData>, ObservableSource {
 
     @SerializedName("id")
     @Expose
+    @PrimaryKey(autoGenerate = true)
     private int id;
     @SerializedName("name")
     @Expose
@@ -153,36 +162,9 @@ public class CharacterData implements Serializable, Comparable<CharacterData>{
         return this.name.compareTo(o.name);
     }
 
-    public class Origin implements Serializable{
 
-         @SerializedName("name")
-         @Expose
-        private String name;
-
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-    }
-
-  public  class Location implements Serializable{
-
-
-      @SerializedName("name")
-      @Expose
-      private String name;
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
+    @Override
+    public void subscribe(Observer observer) {
 
     }
 }

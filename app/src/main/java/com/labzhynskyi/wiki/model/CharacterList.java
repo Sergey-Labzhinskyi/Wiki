@@ -2,6 +2,8 @@ package com.labzhynskyi.wiki.model;
 
 import android.util.Log;
 
+import androidx.room.TypeConverter;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -25,6 +27,7 @@ public class CharacterList implements Serializable {
     private String prev;
     @SerializedName("results")
     @Expose
+
     private List<CharacterData> results;
 
     public List<CharacterData> getResults() {
@@ -74,24 +77,6 @@ public class CharacterList implements Serializable {
     public static List<CharacterData> sCharacters;
 
 
-  /*  public void addCharacter(CharacterData character){
 
-        if (sCharacters == null){
-            sCharacters = new ArrayList<>();
-            sCharacters.add(character);
-        }else {
-            sCharacters.add(character);
-        }
-        Log.d(TAG, String.valueOf(sCharacters.size()));
-    }
-
-    public List<CharacterData> createCharacter(){
-        sCharacters = new ArrayList<>();
-        for (int i = 0; i < 100; i++) {
-             sCharacters.add(new CharacterData());
-        }
-       return sCharacters;
-    }
-*/
 
 }

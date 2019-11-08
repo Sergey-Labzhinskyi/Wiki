@@ -1,10 +1,12 @@
 package com.labzhynskyi.wiki.presenter;
 
-import com.labzhynskyi.wiki.model.CharacterList;
+import com.labzhynskyi.wiki.model.CharacterData;
 import com.labzhynskyi.wiki.view.ICharacterListActivity;
 
+import java.util.List;
+
 import io.reactivex.Observable;
-import io.reactivex.Observer;
+
 
 public interface ICharacterListPresenter {
     void attachView(ICharacterListActivity videoListActivity);
@@ -12,6 +14,10 @@ public interface ICharacterListPresenter {
     void getCharacterList();
     void onClick(int position);
     void onClickButton();
-    Observable<CharacterList> getCharacterObservable(int page);
-    Observer<CharacterList> getCharacterObserver();
+    void getCharacterListNetwork();
+    void saveCharacters();
+    void updateCharacters();
+    Observable<List<CharacterData>> getListCharacterNetwork();
+    Observable<List<CharacterData>> getListCharacterDB();
+
 }

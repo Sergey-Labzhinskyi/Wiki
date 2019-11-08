@@ -1,17 +1,21 @@
 package com.labzhynskyi.wiki.presenter;
 
 import android.annotation.SuppressLint;
+import android.icu.text.SimpleDateFormat;
+import android.os.Build;
 import android.util.Log;
 
+import androidx.annotation.RequiresApi;
+
 import com.labzhynskyi.wiki.model.CharacterData;
-import com.labzhynskyi.wiki.model.CharacterApi;
-import com.labzhynskyi.wiki.model.CharacterList;
 import com.labzhynskyi.wiki.model.CharacterListResult;
-import com.labzhynskyi.wiki.model.ICharacterService;
+import com.labzhynskyi.wiki.model.DataBaseHelper;
 import com.labzhynskyi.wiki.view.ICharacterListActivity;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 
@@ -29,82 +33,141 @@ public class CharacterListPresenter implements ICharacterListPresenter {
 
 
     private ICharacterListActivity mICharacterListActivity;
-    private List<CharacterData> mCharactersData;
-    private CharacterApi mCharacterApi;
+
     private List<CharacterData> mCharacterList;
     private Disposable disposable;
+    private DataBaseHelper mDataBaseHelper;
+    private Date mDate;
+    private SimpleDateFormat mSimpleDateFormat;
+    private String mStringDate;
 
 
     @Override
     public void attachView(ICharacterListActivity iCharacterListActivity) {
         mICharacterListActivity = iCharacterListActivity;
+        mCharacterList = new ArrayList<>();
+        mDataBaseHelper = new DataBaseHelper();
     }
 
     @Override
     public void detachView() {
-    mICharacterListActivity = null;
+        mICharacterListActivity = null;
     }
 
-    @Override
-   public Observable<CharacterList> getCharacterObservable(int page) {
-
-        return mCharacterApi.getRetrofit3().create(ICharacterService.class)
-                .getCharacter1("character/?page=" + page)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread());
-    }
-
-    @Override
-    public Observer<CharacterList> getCharacterObserver() {
-        mCharacterList = new  ArrayList();
-        return new Observer<CharacterList>() {
-            @Override
-            public void onSubscribe(Disposable d) {
-                Log.d(TAG, "onSubscribe");
-                disposable = d;
-            }
-
-            @Override
-            public void onNext(CharacterList characterList) {
-
-                mCharactersData = new ArrayList<>();
-                mCharactersData = characterList.getResults();
-
-                for (int i = 0; i < mCharactersData.size(); i++) {
-                    mCharacterList.add(mCharactersData.get(i));
-                }
-            }
-
-            @Override
-            public void onError(Throwable e) {
-                e.printStackTrace();
-            }
-
-            @Override
-            public void onComplete() {
-                if (mCharacterList.size() == 493) {
-                    CharacterListResult.setCharacterDataList(mCharacterList);
-                    mICharacterListActivity.updateUI(mCharacterList);
-                    disposable.dispose();
-                }
-
-            }
-        };
-    }
 
     @SuppressLint("CheckResult")
     @Override
     public void getCharacterList() {
-        for (int i = 1; i <= 25; i++) {
-            getCharacterObservable(i).subscribeWith(getCharacterObserver());
-        }
 
+        Log.d(TAG, "getCharacterList");
+        getListCharacterNetwork()
+                .subscribeOn(Schedulers.io()).retry()
+                .ambWith(getListCharacterDB().subscribeOn(Schedulers.io()))
+                .map(s -> mCharacterList = s)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<List<CharacterData>>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+                        Log.d(TAG, "onSubscribe");
+                        disposable = d;
+                    }
+
+                    @Override
+                    public void onNext(List<CharacterData> characterDataList) {
+                        Log.d(TAG, "onNext");
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.d(TAG, "onError" + e.toString());
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        Log.d(TAG, "onComplete");
+                        CharacterListResult.setCharacterDataList(mCharacterList);
+                        mICharacterListActivity.updateUI(mCharacterList, getDate());
+                        disposable.dispose();
+                    }
+                });
+
+
+    }
+
+    @Override
+    public void getCharacterListNetwork() {
+        Log.d(TAG, "getCharacterListNetwork");
+        getListCharacterNetwork()
+                .map(s -> mCharacterList = s)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<List<CharacterData>>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+                        Log.d(TAG, "getCharacterListNetwork + onSubscribe");
+                        disposable = d;
+                    }
+
+                    @Override
+                    public void onNext(List<CharacterData> characterDataList) {
+                        Log.d(TAG, "getCharacterListNetwork + onNext");
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.d(TAG, "getCharacterListNetwork + onError" + e.toString());
+                    }
+
+                    @RequiresApi(api = Build.VERSION_CODES.N)
+                    @Override
+                    public void onComplete() {
+                        Log.d(TAG, "getCharacterListNetwork + onComplete");
+                        CharacterListResult.setCharacterDataList(mCharacterList);
+                        mICharacterListActivity.updateUI(mCharacterList, getDate());
+                        // mICharacterListActivity.setDate();
+                        disposable.dispose();
+                    }
+                });
+
+
+    }
+    @Override
+    public void saveCharacters() {
+        Log.d(TAG, "saveCharacters");
+        mDataBaseHelper.saveCharacters(mCharacterList);
+    }
+    @Override
+    public void updateCharacters() {
+        Log.d(TAG, "updateCharacters");
+        mDataBaseHelper.updateCharacters(mCharacterList);
+
+    }
+
+    @Override
+    public Observable<List<CharacterData>> getListCharacterNetwork() {
+        Log.d(TAG, "getListCharacterNetwork");
+        return Observable.range(1, 25)
+                .flatMap(page -> mDataBaseHelper.getCharactersNetwork(page))
+                .flatMap(i -> Observable.just(i.getResults()))
+                .flatMap(i -> Observable.fromIterable(i))
+                .map(s -> {
+                    mCharacterList.add(s);
+                    return mCharacterList;
+                });
+    }
+
+
+    @SuppressLint("CheckResult")
+    @Override
+    public Observable<List<CharacterData>> getListCharacterDB() {
+        Log.d(TAG, "getListCharacterDB");
+        return mDataBaseHelper.getCharactersDB();
     }
 
 
     @Override
     public void onClick(int position) {
-        mICharacterListActivity.startVideoActivity(position);
+        mICharacterListActivity.startCharacterActivity(position);
     }
 
     @SuppressLint("CheckResult")
@@ -112,9 +175,18 @@ public class CharacterListPresenter implements ICharacterListPresenter {
     public void onClickButton() {
         Log.d(TAG, "onClickButton");
         Collections.sort(mCharacterList);
-        getCharacterObserver();
         mICharacterListActivity.updateUISort();
     }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    public String getDate() {
+        Log.d(TAG, "getDate");
+        mDate = Calendar.getInstance().getTime();
+        mSimpleDateFormat = new SimpleDateFormat("dd.MM.yyyy, HH:mm");
+        return mStringDate = mSimpleDateFormat.format(mDate);
+    }
+
+
 }
 
 

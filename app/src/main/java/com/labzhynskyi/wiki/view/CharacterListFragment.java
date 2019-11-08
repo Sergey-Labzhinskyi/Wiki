@@ -27,17 +27,22 @@ public class CharacterListFragment extends Fragment implements ICharacterListFra
 
     private static final String TAG = "CharacterListFragment";
     private static final String ARG_PERMISSION = "CharacterData";
+    private static final String DATE = "Date";
     private RecyclerView mRecyclerView;
     private CharacterAdapter mCharacterAdapter;
     private CallbackOnClickList mCallbackOnClickList;
     private List<CharacterData> mCharacters;
     private Button mButtonSort;
+    private TextView mTextViewDate;
+    private View mView;
+    private String mStringDate;
 
 
-    public static CharacterListFragment newInstance(List<CharacterData> characterList) {
+    public static CharacterListFragment newInstance(List<CharacterData> characterList, String date) {
         final CharacterListFragment fragment = new CharacterListFragment();
         final Bundle arguments = new Bundle();
         arguments.putSerializable(ARG_PERMISSION, (Serializable) characterList);
+        arguments.putString(DATE, date);
         fragment.setArguments(arguments);
         return fragment;
     }
@@ -69,6 +74,7 @@ public class CharacterListFragment extends Fragment implements ICharacterListFra
         if (getArguments() != null && getArguments().containsKey(ARG_PERMISSION)) {
             mCharacters = new ArrayList<>();
             mCharacters = (List<CharacterData>) getArguments().getSerializable(ARG_PERMISSION);
+            mStringDate = getArguments().getString(DATE);
             Log.d(TAG, "onCreate"  + mCharacters.size());
         } else {
             throw new IllegalArgumentException("Must be created through newInstance(...)");
@@ -76,15 +82,18 @@ public class CharacterListFragment extends Fragment implements ICharacterListFra
     }
 
 
+    @SuppressLint("SetTextI18n")
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         Log.d(TAG, "onCreateView");
-        View view = inflater.inflate(R.layout.fragment_character_list, container, false);
+        mView = inflater.inflate(R.layout.fragment_character_list, container, false);
 
-        mRecyclerView = (RecyclerView) view.findViewById(R.id.video_recycler_view);
+        mRecyclerView = (RecyclerView) mView.findViewById(R.id.character_recycler_view);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        mButtonSort = (Button) view.findViewById(R.id.sort_button);
+        mTextViewDate = (TextView) mView.findViewById(R.id.date);
+        mTextViewDate.setText("Last update: " + mStringDate);
+        mButtonSort = (Button) mView.findViewById(R.id.sort_button);
         mButtonSort.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -94,7 +103,7 @@ public class CharacterListFragment extends Fragment implements ICharacterListFra
 
         updateUI();
 
-        return view;
+        return mView;
     }
 
     @Override
@@ -114,6 +123,12 @@ public class CharacterListFragment extends Fragment implements ICharacterListFra
     public void UpdateUISort() {
         updateUI();
     }
+
+   /* @Override
+    public void setDate(String date) {
+
+        mTextViewDate.setText(date);
+    }*/
 
     private class CharacterHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
