@@ -66,7 +66,7 @@ public class DataBaseHelper {
 
     public Observable<CharacterList> getCharactersNetwork(int page) {
         return CharacterApi.getRetrofit().create(ICharacterService.class)
-                .getCharacter1("character/?page=" + page)
+                .getCharacter("character/?page=" + page)
                 .doOnNext(s -> Log.d(TAG, String.valueOf(s.getResults().size())))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
